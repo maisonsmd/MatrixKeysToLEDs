@@ -1,0 +1,59 @@
+###########################################
+# Syntax Coloring Map For MatrixKeyToLEDs
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+
+MatrixKeyToLEDs	KEYWORD1
+
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+init	KEYWORD2
+Execute	KEYWORD2
+Beep	KEYWORD2
+SetLEDsIntensity	KEYWORD2
+ClearAll	KEYWORD2
+SetAll	KEYWORD2
+SetLed	KEYWORD2
+SetToneStyle	KEYWORD2
+SetKeyToggleStyle	KEYWORD2
+SetRowToggleStyle	KEYWORD2
+SetColumnToggleStyle	KEYWORD2
+SetKeysToggleStyle	KEYWORD2
+SetReactMoment	KEYWORD2
+SetDebounceInterval	KEYWORD2
+SetBuzzerType	KEYWORD2
+SetBuzzerActiveLogicLevel	KEYWORD2
+AddKeyGroup	KEYWORD2
+ShortLock	KEYWORD2
+Unlock	KEYWORD2
+Lock	KEYWORD2
+IsLocked	KEYWORD2
+GetLoginState	KEYWORD2
+GetLockState	KEYWORD2
+SetLockButton	KEYWORD2
+SetShortLockIndicatorPin	KEYWORD2
+SetTempOutput	KEYWORD2
+SetLockIndicatorPin	KEYWORD2
+SetLockSwitch	KEYWORD2
+GetButtonsState	KEYWORD2
+GetButtonState	KEYWORD2
+GetLEDsState	KEYWORD2
+GetLEDState	KEYWORD2
+###########################################
+# Constants (LITERAL1)
+###########################################
+INACTIVE	LITERAL1
+ACTIVE	LITERAL1
+CLICK_TOGGLE	LITERAL1
+PRESS_AND_HOLD	LITERAL1
+RELEASED	LITERAL1
+HOLDING	LITERAL1
+ON_CLICK	LITERAL1
+ON_RELEASE	LITERAL1
+SUPPLY_FREQ	LITERAL1
+SUPPLY_VOLTAGE	LITERAL1
+NO_PIN	LITERAL1

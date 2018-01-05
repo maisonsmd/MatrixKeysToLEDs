@@ -1,0 +1,15 @@
+{
+  "name": "MatrixKeyToLEDs",
+  "keywords": "LED, matrix, keypad, keyboard",
+  "description": "A customized library for my customer.",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/maisonsmd"
+  },
+  "frameworks": "arduino",
+  "platforms":
+  [
+    "atmelavr"
+  ]
+}
