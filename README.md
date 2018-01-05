@@ -1,2 +1,2 @@
 # MatrixKeyToLEDs
-A customized library for my customer
+A customized library
