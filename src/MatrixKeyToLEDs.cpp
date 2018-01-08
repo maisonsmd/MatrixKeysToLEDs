@@ -66,8 +66,8 @@ void MatrixKeyToLEDsClass::pReact(uint8_t row, uint8_t column, uint8_t state)
 		if ((pReactMoment == ON_CLICK && state == HOLDING)
 			|| (pReactMoment == ON_RELEASE && state == RELEASED))
 		{
-			if (GetLEDState(row, column) == 0)	//if this LED is OFF
-				pFlashTempOutput(toIndex(row, column));
+			/*if (GetLEDState(row, column) == 0)	//if this LED is OFF
+				pFlashTempOutput(toIndex(row, column));*/
 			//if this key belogs to any group. exit;
 			if (pScanGroup(row, column, state, CLICK_TOGGLE))
 				return;
@@ -79,10 +79,10 @@ void MatrixKeyToLEDsClass::pReact(uint8_t row, uint8_t column, uint8_t state)
 	else						//PRESS_AND_HOLD
 	{
 		//if this key belogs to any group. exit;
-		if (state == HOLDING)
+		/*if (state == HOLDING)
 		{
 			pFlashTempOutput(toIndex(row, column));
-		}
+		}*/
 		if (pScanGroup(row, column, state, PRESS_AND_HOLD))
 			return;
 
@@ -204,6 +204,8 @@ boolean MatrixKeyToLEDsClass::pIsLockSwitchActivated(void)
 #ifdef USE_RFID
 	return false;
 #else
+	if (pLockSwitchPin == NO_PIN)
+		return false;
 	return  digitalRead(pLockSwitchPin) == pLockSwitchActiveLogicLevel;
 #endif // !USE_RFID
 }
@@ -428,6 +430,14 @@ void MatrixKeyToLEDsClass::Lock(void)
 	pResetAutoLockTimers();
 }
 
+void MatrixKeyToLEDsClass::pHandleOutputs(void)
+{
+	for (uint8_t output = 0; output < pNumberOfOutputs; output++)
+	{
+		digitalWrite(pOutputArray[output].outputPin, GetLEDState(pOutputArray[output].keyIndex));
+	}
+}
+
 void MatrixKeyToLEDsClass::pResetAutoLockTimers(void)
 {
 	pShortLockAutoEnableCounter = millis();
@@ -527,7 +537,7 @@ void MatrixKeyToLEDsClass::pHandleShortLockButton(void)
 	}
 }
 
-void MatrixKeyToLEDsClass::pHandleTempOutput()
+/*void MatrixKeyToLEDsClass::pHandleTempOutput()
 {
 	if (pTempOutputPin == NO_PIN)
 		return;
@@ -538,7 +548,7 @@ void MatrixKeyToLEDsClass::pHandleTempOutput()
 	digitalWrite(pTempOutputPin, pLEDStateArray[row][col]);
 
 	//The code below used to auto turn on-off temp output. Customer asked to disable!
-	/*if (digitalRead(pTempOutputPin) == LOW && !isWaitingToTurnTempOutputOn)
+	/* if (digitalRead(pTempOutputPin) == LOW && !isWaitingToTurnTempOutputOn)
 		return;
 
 	if (pTempOutputInitTmr > millis())
@@ -558,16 +568,17 @@ void MatrixKeyToLEDsClass::pHandleTempOutput()
 	if (millis() - pTempOutputIntervalTmr > pTempOutputInterval)
 	{
 		digitalWrite(pTempOutputPin, LOW);
-	}*/
+	}* /
 }
+*/
 
-void MatrixKeyToLEDsClass::pFlashTempOutput(uint8_t keyIndex)
+/*void MatrixKeyToLEDsClass::pFlashTempOutput(uint8_t keyIndex)
 {
 	/*if (keyIndex != pTempOutputKeyIndex)
 		return;
 	isWaitingToTurnTempOutputOn = true;
-	pTempOutputInitTmr = millis();			//start counting to turn on*/
-}
+	pTempOutputInitTmr = millis();			//start counting to turn on* /
+}*/
 
 void MatrixKeyToLEDsClass::init(void)
 {
@@ -674,7 +685,8 @@ void MatrixKeyToLEDsClass::Execute(void)
 
 	obj.pHandleLockStateIndicator();
 	obj.pHandleShortLockButton();
-	obj.pHandleTempOutput();
+	//obj.pHandleTempOutput();
+	obj.pHandleOutputs();
 
 	static uint32_t tmrStable = millis();
 	if (tmrStable > millis())
@@ -922,8 +934,28 @@ void MatrixKeyToLEDsClass::SetShortLockIndicatorPin(uint8_t pin)
 	digitalWrite(pShortLockIndicatorPin, LOW);
 }
 
+void MatrixKeyToLEDsClass::AddOutput(uint8_t pin, uint8_t keyIndex)
+{
+	OutputsStruct * TempOutputArray = new OutputsStruct[pNumberOfOutputs + 1];
+	TempOutputArray[pNumberOfOutputs].outputPin = pin;
+	TempOutputArray[pNumberOfOutputs].keyIndex = keyIndex;
+	pinMode(pin, OUTPUT);
+
+	for(uint8_t output = 0; output < pNumberOfOutputs; output ++)
+	{
+		TempOutputArray[output] = pOutputArray[output];
+	}
+
+	if (pOutputArray != nullptr)
+		delete[] pOutputArray;
+
+	pOutputArray = TempOutputArray;
+
+	pNumberOfOutputs++;
+}
+
 //void MatrixKeyToLEDsClass::SetTempOutput(uint8_t pin, uint8_t keyIndex, uint32_t initTime, uint32_t interval = 100)
-void MatrixKeyToLEDsClass::SetTempOutput(uint8_t pin, uint8_t keyIndex)
+/*void MatrixKeyToLEDsClass::SetTempOutput(uint8_t pin, uint8_t keyIndex)
 {
 	pTempOutputPin = pin;
 	//pTempOutputInitTime = initTime;
@@ -931,7 +963,7 @@ void MatrixKeyToLEDsClass::SetTempOutput(uint8_t pin, uint8_t keyIndex)
 	pTempOutputKeyIndex = keyIndex;
 	pinMode(pTempOutputPin, OUTPUT);
 	digitalWrite(pTempOutputPin, LOW);
-}
+}*/
 
 void MatrixKeyToLEDsClass::GetButtonsState(uint8_t(*buttonArray)[ROWS][COLUMNS])
 {

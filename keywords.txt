@@ -36,7 +36,7 @@ GetLoginState	KEYWORD2
 GetLockState	KEYWORD2
 SetLockButton	KEYWORD2
 SetShortLockIndicatorPin	KEYWORD2
-SetTempOutput	KEYWORD2
+AddOutput	KEYWORD2
 SetLockIndicatorPin	KEYWORD2
 SetLockSwitch	KEYWORD2
 GetButtonsState	KEYWORD2

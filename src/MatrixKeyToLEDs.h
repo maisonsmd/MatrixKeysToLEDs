@@ -10,7 +10,7 @@
 #endif
 
 //Uncomment this line to use external RFID module
-#define USE_RFID
+//#define USE_RFID
 
 #include <SPI.h>
 #include <DirectIO.h>
@@ -120,6 +120,13 @@ enum LoginState
 	LOGGED_OUT
 };
 
+struct OutputsStruct
+{
+	uint8_t keyIndex;
+	uint8_t outputPin;
+};
+
+
 class MatrixKeyToLEDsClass
 {
 protected:
@@ -184,13 +191,17 @@ private:
 	uint32_t pShortLockDelayTime;
 
 
-	uint8_t pTempOutputPin = NO_PIN;
-	uint8_t pTempOutputKeyIndex;
+	
+	//uint8_t pTempOutputPin = NO_PIN;
+	//uint8_t pTempOutputKeyIndex;
 	//uint32_t pTempOutputInitTmr = 0;
 	//uint32_t pTempOutputIntervalTmr = 0;
 	//uint32_t pTempOutputInitTime = 0;	//wait to ON
 	//uint32_t pTempOutputInterval = 100;	//wait to OFF
-	boolean isWaitingToTurnTempOutputOn = false;
+	//boolean isWaitingToTurnTempOutputOn = false;
+
+	uint8_t pNumberOfOutputs = 0;
+	OutputsStruct * pOutputArray = nullptr;
 
 	struct KeyGroup {
 		volatile uint8_t size = 0;
@@ -208,8 +219,9 @@ private:
 
 	uint8_t toIndex(uint8_t row, uint8_t col);
 	void toRowCol(uint8_t index, uint8_t * row, uint8_t * col);
-	void pHandleTempOutput(void);
-	void pFlashTempOutput(uint8_t keyIndex);
+	//void pHandleTempOutput(void);
+	//void pFlashTempOutput(uint8_t keyIndex);
+	void pHandleOutputs(void);
 
 	void pResetAutoLockTimers(void);
 	void pHandleShortLockButton(void);
@@ -259,7 +271,8 @@ public:
 
 	void SetShortLockIndicatorPin(uint8_t pin);
 	//void SetTempOutput(uint8_t pin, uint8_t keyIndex, uint32_t initTime, uint32_t interval = 100);
-	void SetTempOutput(uint8_t pin, uint8_t keyIndex);
+	//void SetTempOutput(uint8_t pin, uint8_t keyIndex);
+	void AddOutput(uint8_t pin, uint8_t keyIndex);
 
 #ifdef USE_RFID
 	//Set the period to completely lock the key pad after the short lock event

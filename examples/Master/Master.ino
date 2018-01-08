@@ -20,7 +20,8 @@ void setup()
 	//Muc logic kich buzzer [HIGH(*) | LOW]
 	MatrixKeyToLEDs.SetBuzzerActiveLogicLevel(HIGH);
 	//Dat ngo ra dieu khien (Chan, phim nhan tuong ung)
-	MatrixKeyToLEDs.SetTempOutput(10, 1);
+	MatrixKeyToLEDs.AddOutput(10, 1);
+	MatrixKeyToLEDs.AddOutput(9, 2);
 	//Dat phim nhan khoa (Chan, Muc logic [HIGH/LOW], thoi gian tu khoa (giay) [0 = DISABLE])
 	MatrixKeyToLEDs.SetLockButton(12, LOW, 10);
 	//Dat cong tac khoa (chan, muc logic [HIGH/LOW])
