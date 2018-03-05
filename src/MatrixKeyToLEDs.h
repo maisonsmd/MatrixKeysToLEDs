@@ -10,7 +10,7 @@
 #endif
 
 //Uncomment this line to use external RFID module
-#define USE_RFID
+//#define USE_RFID
 
 #include <SPI.h>
 #include <DirectIO.h>
