@@ -10,7 +10,7 @@
 #endif
 
 //Uncomment this line to use external RFID module
-//#define USE_RFID
+#define USE_RFID
 
 #include <SPI.h>
 #include <DirectIO.h>
@@ -37,7 +37,7 @@
 #define ROWS		8		//Max value. If use more, change the algorithm back to 2D array (changed!!)
 #define COLUMNS		8
 
-//#define ENABLE_LOG
+#define ENABLE_LOG
 
 #ifdef ENABLE_LOG
 #define BEGIN(x)	Serial.begin(x)
@@ -191,7 +191,7 @@ private:
 	uint32_t pShortLockDelayTime;
 
 
-	
+
 	//uint8_t pTempOutputPin = NO_PIN;
 	//uint8_t pTempOutputKeyIndex;
 	//uint32_t pTempOutputInitTmr = 0;
@@ -291,9 +291,121 @@ public:
 	void GetLEDsState(uint8_t(*LEDArray)[ROWS*COLUMNS]);
 	uint8_t GetLEDState(uint8_t LEDNumber);
 	uint8_t GetLEDState(uint8_t row, uint8_t column);
+
+#pragma region ADDED_FEATURES
+
+#pragma endregion
+
 };
 
 extern MatrixKeyToLEDsClass MatrixKeyToLEDs;
 
+class OutputsProcessor
+{
+private:
+	uint32_t clickTick = 0;		//click moment
+	uint32_t startBTick = 0;		//Turning B on moment
+	boolean started = false;		//time counting started?
+	boolean isOutputBStarted = false;//time B counting started?
+	boolean previousLEDState = 0;
+	uint8_t previousButtonState = 0;
+	boolean isHolding = false;	//is button being held down?
+	uint8_t currentButtonState = 0;
+	uint8_t currentLEDState = 0;
+public:
+	uint32_t t1 = 1000;	//ms, time to trigger output B
+	uint32_t t2 = 2000;	//ms, time to trigger output C
+	uint32_t t3 = 3000;	//ms, time to trigger output D
+	uint32_t t_on_B = 500;	//0.5s, time to hold output B state
+	uint8_t buttonIndex, outputApin, outputBpin, outputCpin, outputDpin;
+
+	uint32_t holdDuration = 3000;
+	uint8_t ACTIVE_LOGIC_LEVEL = HIGH;
+	OutputsProcessor(const uint8_t _buttonIndex, const uint8_t _outputApin, const uint8_t _outputBpin
+		= NO_PIN, const uint8_t _outputCpin = NO_PIN, const uint8_t _outputDpin = NO_PIN)
+		:buttonIndex(_buttonIndex),
+		outputApin(_outputApin),
+		outputBpin(_outputBpin),
+		outputCpin(_outputCpin),
+		outputDpin((_outputDpin)){}
+
+	void Execute()
+	{
+		currentButtonState = MatrixKeyToLEDs.GetButtonState(buttonIndex);
+		currentLEDState = MatrixKeyToLEDs.GetLEDState(buttonIndex);
+
+		//check if variables overflowed
+
+		if (currentTick < clickTick)
+			clickTick = currentTick;
+
+		if (currentTick < startBTick)
+			startBTick = currentTick;
+
+
+		//Exit if locked
+		if (MatrixKeyToLEDs.GetLockState() != LockState::UNLOCKED)
+			return;
+
+		if (currentButtonState == 1 && previousButtonState == 0)	//just clicked
+		{
+			isHolding = true;
+			clickTick = currentTick;
+		}
+		if (currentButtonState == 0 && previousButtonState == 1)	//just released
+		{
+			isHolding = false;
+		}
+		previousButtonState = currentLEDState;	//update previous button state
+
+		if (isHolding)
+		{
+			if (currentTick - clickTick > holdDuration)
+			{
+				//ON COMMAND
+				started = true;
+				digitalWrite(outputApin, ACTIVE_LOGIC_LEVEL);
+			}
+		}
+
+		if (currentLEDState == 0 && previousLEDState == 1)	// turned off
+															//OFF COMMAND
+		{
+			started = false;
+			isOutputBStarted = false;
+			digitalWrite(outputApin, !ACTIVE_LOGIC_LEVEL);
+			digitalWrite(outputBpin, !ACTIVE_LOGIC_LEVEL);
+			if (outputCpin != 255)
+				digitalWrite(outputCpin, !ACTIVE_LOGIC_LEVEL);
+			if (outputDpin != 255)
+				digitalWrite(outputDpin, !ACTIVE_LOGIC_LEVEL);
+		}
+		previousLEDState = currentLEDState;	//update previous LED state
+
+		if (started)
+		{
+			if (currentTick - clickTick > t1 && isOutputBStarted == false)
+			{
+				isOutputBStarted = true;
+				startBTick = currentTick;
+				digitalWrite(outputBpin, ACTIVE_LOGIC_LEVEL);
+			}
+			if (currentTick - startBTick > t_on_B && isOutputBStarted == true)
+			{
+				digitalWrite(outputBpin, !ACTIVE_LOGIC_LEVEL);
+			}
+			if (currentTick - clickTick > t2)
+			{
+				if (outputCpin != 255)
+					digitalWrite(outputCpin, ACTIVE_LOGIC_LEVEL);
+			}
+			if (currentTick - clickTick > t3)
+			{
+				if (outputDpin != 255)
+					digitalWrite(outputDpin, ACTIVE_LOGIC_LEVEL);
+			}
+		}
+	}
+};
 #endif
 
