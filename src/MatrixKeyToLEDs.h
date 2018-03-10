@@ -10,7 +10,7 @@
 #endif
 
 //Uncomment this line to use external RFID module
-//#define USE_RFID
+#define USE_RFID
 
 #include <SPI.h>
 #include <DirectIO.h>
@@ -327,13 +327,14 @@ public:
 		outputApin(_outputApin),
 		outputBpin(_outputBpin),
 		outputCpin(_outputCpin),
-		outputDpin((_outputDpin)){}
+		outputDpin(_outputDpin){}
 
 	void Execute()
 	{
 		currentButtonState = MatrixKeyToLEDs.GetButtonState(buttonIndex);
 		currentLEDState = MatrixKeyToLEDs.GetLEDState(buttonIndex);
 
+		uint32_t currentTick = millis();
 		//check if variables overflowed
 
 		if (currentTick < clickTick)
