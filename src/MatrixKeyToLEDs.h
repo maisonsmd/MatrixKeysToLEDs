@@ -357,7 +357,7 @@ public:
 		{
 			isHolding = false;
 		}
-		previousButtonState = currentLEDState;	//update previous button state
+		previousButtonState = currentButtonState;	//update previous button state
 
 		if (isHolding)
 		{
