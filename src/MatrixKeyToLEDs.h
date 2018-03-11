@@ -327,7 +327,16 @@ public:
 		outputApin(_outputApin),
 		outputBpin(_outputBpin),
 		outputCpin(_outputCpin),
-		outputDpin(_outputDpin){}
+		outputDpin(_outputDpin)
+	{
+		pinMode(outputApin, OUTPUT);
+		if (outputBpin != NO_PIN)
+			pinMode(outputBpin, OUTPUT);
+		if (outputCpin != NO_PIN)
+			pinMode(outputCpin, OUTPUT);
+		if (outputDpin != NO_PIN)
+			pinMode(outputDpin, OUTPUT);
+	}
 
 	void Execute()
 	{
