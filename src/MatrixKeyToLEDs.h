@@ -304,14 +304,13 @@ class OutputsProcessor
 {
 private:
 	uint32_t clickTick = 0;		//click moment
+	uint32_t startTick = 0;		//click accept moment
 	uint32_t startBTick = 0;		//Turning B on moment
 	boolean started = false;		//time counting started?
 	boolean isOutputBStarted = false;//time B counting started?
-	boolean previousLEDState = 0;
 	uint8_t previousButtonState = 0;
 	boolean isHolding = false;	//is button being held down?
 	uint8_t currentButtonState = 0;
-	uint8_t currentLEDState = 0;
 public:
 	uint32_t t1 = 1000;	//ms, time to trigger output B
 	uint32_t t2 = 2000;	//ms, time to trigger output C
@@ -330,19 +329,29 @@ public:
 		outputDpin(_outputDpin)
 	{
 		pinMode(outputApin, OUTPUT);
+		digitalWrite(outputApin, !ACTIVE_LOGIC_LEVEL);
 		if (outputBpin != NO_PIN)
+		{
 			pinMode(outputBpin, OUTPUT);
+			digitalWrite(outputBpin, !ACTIVE_LOGIC_LEVEL);
+		}
 		if (outputCpin != NO_PIN)
+		{
 			pinMode(outputCpin, OUTPUT);
+			digitalWrite(outputCpin, !ACTIVE_LOGIC_LEVEL);
+		}
 		if (outputDpin != NO_PIN)
+		{
 			pinMode(outputDpin, OUTPUT);
+			digitalWrite(outputDpin, !ACTIVE_LOGIC_LEVEL);
+		}
 	}
 
 	void Execute()
 	{
 		currentButtonState = MatrixKeyToLEDs.GetButtonState(buttonIndex);
 		currentLEDState = MatrixKeyToLEDs.GetLEDState(buttonIndex);
-
+		
 		uint32_t currentTick = millis();
 		//check if variables overflowed
 
@@ -370,31 +379,33 @@ public:
 
 		if (isHolding)
 		{
-			if (currentTick - clickTick > holdDuration)
+			if (currentTick - clickTick > holdDuration)	// click acepted
 			{
-				//ON COMMAND
-				started = true;
-				digitalWrite(outputApin, ACTIVE_LOGIC_LEVEL);
+				isHolding = false;		//to avoid entering this section in the next function call
+				if (started)
+				{
+					started = false;
+					isOutputBStarted = false;
+					digitalWrite(outputApin, !ACTIVE_LOGIC_LEVEL);
+					digitalWrite(outputBpin, !ACTIVE_LOGIC_LEVEL);
+					if (outputCpin != 255)
+						digitalWrite(outputCpin, !ACTIVE_LOGIC_LEVEL);
+					if (outputDpin != 255)
+						digitalWrite(outputDpin, !ACTIVE_LOGIC_LEVEL);
+				}
+				else
+				{
+					//ON COMMAND
+					startTick = currentTick;
+					started = true;
+					digitalWrite(outputApin, ACTIVE_LOGIC_LEVEL);
+				}
 			}
 		}
-
-		if (currentLEDState == 0 && previousLEDState == 1)	// turned off
-															//OFF COMMAND
-		{
-			started = false;
-			isOutputBStarted = false;
-			digitalWrite(outputApin, !ACTIVE_LOGIC_LEVEL);
-			digitalWrite(outputBpin, !ACTIVE_LOGIC_LEVEL);
-			if (outputCpin != 255)
-				digitalWrite(outputCpin, !ACTIVE_LOGIC_LEVEL);
-			if (outputDpin != 255)
-				digitalWrite(outputDpin, !ACTIVE_LOGIC_LEVEL);
-		}
-		previousLEDState = currentLEDState;	//update previous LED state
-
+		
 		if (started)
 		{
-			if (currentTick - clickTick > t1 && isOutputBStarted == false)
+			if (currentTick - startTick > t1 && isOutputBStarted == false)
 			{
 				isOutputBStarted = true;
 				startBTick = currentTick;
@@ -404,12 +415,12 @@ public:
 			{
 				digitalWrite(outputBpin, !ACTIVE_LOGIC_LEVEL);
 			}
-			if (currentTick - clickTick > t2)
+			if (currentTick - startTick > t2)
 			{
 				if (outputCpin != 255)
 					digitalWrite(outputCpin, ACTIVE_LOGIC_LEVEL);
 			}
-			if (currentTick - clickTick > t3)
+			if (currentTick - startTick > t3)
 			{
 				if (outputDpin != 255)
 					digitalWrite(outputDpin, ACTIVE_LOGIC_LEVEL);
