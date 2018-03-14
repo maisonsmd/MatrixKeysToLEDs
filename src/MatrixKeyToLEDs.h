@@ -350,7 +350,6 @@ public:
 	void Execute()
 	{
 		currentButtonState = MatrixKeyToLEDs.GetButtonState(buttonIndex);
-		currentLEDState = MatrixKeyToLEDs.GetLEDState(buttonIndex);
 		
 		uint32_t currentTick = millis();
 		//check if variables overflowed
